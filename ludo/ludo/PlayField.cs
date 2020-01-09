@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace ludo
@@ -18,8 +20,54 @@ namespace ludo
             int nummber = Dice.Next(1, 7);
             numbers.Add(nummber);
 
+            if (numbers.Count > 5000)
+            {
+                var playerHist =  new List<Hist>();
+
+                Dictionary<string, string> translator = new Dictionary<string, string>();
+
+                foreach (var Field in MainField)
+                {
+                    translator.Add(Field.ID, MainField.IndexOf(Field).ToString());
+                }
+
+                foreach (var Player in Players)
+                {
+                    List<string> moves = new List<string>();
+                    foreach (var playerMoves in Player.moves)
+                    {
+                        if(translator.TryGetValue(playerMoves, out string value))
+                        {
+                            moves.Add(value);
+                        }
+                        else
+                        {
+                            moves.Add(playerMoves);
+                        }
+                        
+                    }
+                    var playerHistPart = new Hist
+                    {
+                        Color = Player.Color,
+                        Moves = moves
+                    };
+                    playerHist.Add(playerHistPart);
+                }
+                string json = JsonConvert.SerializeObject(playerHist.ToArray());
+
+                string path = Path.GetTempPath() + "ludo";
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+                //write string to file
+                System.IO.File.WriteAllText(path + @"\hist.json", json);
+            }
+
             return nummber;
         }
+
+
 
         public List<Player> Players { get; private set; }
         public List<Field> MainField { get; private set; }
@@ -77,15 +125,20 @@ namespace ludo
 
         private void DecideToMove(Player Player)
         {
+            Player.LogMoves();
             if (Player.decideToMove(RollTheDice(), out int times))
             {
                 for (int i = 0; i < times; i++)
                 {
                     if (!Player.decideToMove(RollTheDice(), out int j))
                     {
+                        Player.LogMoves();
                         return;
                     }
+
+                    Player.LogMoves();
                 }
+                Player.LogMoves();
             }
         }
     }

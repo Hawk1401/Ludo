@@ -14,6 +14,9 @@ namespace ludo
         public List<Field> FieldWay { get; private set; }
         public List<Field> Homes { get; private set; }
 
+        public List<string> moves = new List<string>();
+
+
         public Player(string color, int offSet, List<Field> mainField)
         {
             Figures = new List<Figure>();
@@ -51,6 +54,24 @@ namespace ludo
             }
         }
 
+        public void LogMoves()
+        {
+            foreach (var Figure in Figures)
+            {
+                if (Figure.StandingOn == null)
+                {
+                    moves.Add("home");
+                }
+                else if (Figure.StandingOn.IsHome)
+                {
+                    moves.Add("done");
+                }
+                else
+                {
+                    moves.Add(Figure.StandingOn.ID);
+                }
+            }
+        }
         public bool decideToMove(int diceNumber, out int Rolls)
         {
             Rolls = 0;
@@ -238,7 +259,6 @@ namespace ludo
             }
 
             figure.Move(FieldWay[moveToo]);
-
             return true;
 
         } 

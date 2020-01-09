@@ -13,7 +13,6 @@ namespace ludo
 
 
                 Random r = new Random();
-
                 List<string> won = new List<string>();
                 for (int i = 0; i < 1000000; i++)
                 {
